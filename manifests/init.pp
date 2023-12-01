@@ -13,15 +13,17 @@ class io_metricbeat (
   $health                    = lookup('io_metricbeat::health', undef, undef, true),
   $health_fields             = lookup('io_metricbeat::health_fields', undef, undef, 'name,state,activationTime'),
   $jvm                       = lookup('io_metricbeat::jvm', undef, undef, true),
-  $pia                       = lookup('io_metricbeat::pia', undef, undef, true)
+  $jvm_fields                = lookup('io_metricbeat::jvm_fields', undef, undef, 'heapSizeCurrent,heapFreeCurrent,heapFreePercent,heapSizeMax,name,type'),
+  $pia                       = lookup('io_metricbeat::pia', undef, undef, true),
+  $pia_fields                = lookup('io_metricbeat::pia_fields', undef, undef, 'openSessionsCurrentCount,openSessionsHighCount')
 ) {
   if ($health) {
     contain ::io_metricbeat::health
   }
-  # if ($jvm) {
-  #   contain ::io_metricbeat::jvm
-  # }
-  # if ($pia) {
-  #   contain ::io_metricbeat::pia
-  # }
+  if ($jvm) {
+    contain ::io_metricbeat::jvm
+  }
+  if ($pia) {
+    contain ::io_metricbeat::pia
+  }
 }

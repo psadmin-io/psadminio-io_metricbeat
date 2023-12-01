@@ -1,0 +1,14 @@
+- module: http
+  metricsets:
+    - json
+  period: '<%= @check_interval %>'
+  hosts: ["http://<%= @fqdn %>:<%= @port %>/management/weblogic/latest/serverRuntime/applicationRuntimes/peoplesoft/componentRuntimes/PIA_?fields=<%= @pia_fields %>&links=none"]
+  namespace: "pia"
+  method: "GET"
+  username: "<%= @user %>"
+  password: "<%= @pwd %>"
+  service:
+    name: <%= @service_name %>
+  fields:
+    hostname: <%= @host %>
+    id: weblogic-<%= @service_name %>-<%= @host %>
