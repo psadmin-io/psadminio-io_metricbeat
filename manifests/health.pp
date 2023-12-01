@@ -9,7 +9,7 @@ class io_metricbeat::health (
   $host                      = $io_metricbeat::host,
   $port                      = $io_metricbeat::port,
   $user                      = $io_metricbeat::user,
-  $pwd                       = $io_metricbeat::port,
+  $pwd                       = $io_metricbeat::pwd,
   $health_fields             = $io_metricbeat::health_fields
 ) inherits io_metricbeat {
   notify { "Create Metricbeat monitors for Health Status of ${service_name}-${host}": }
