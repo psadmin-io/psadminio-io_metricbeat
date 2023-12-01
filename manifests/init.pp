@@ -1,4 +1,4 @@
-class io_wl_stats (
+class io_metricbeat (
   $ensure                    = lookup('ensure', undef, undef, 'present'),
   $psft_runtime_user_name    = lookup('psft_runtime_user_name', undef, undef, 'psadm2'),
   $psft_runtime_group_name   = lookup('psft_runtime_group_name', undef, undef, 'oinstall'),
@@ -6,24 +6,24 @@ class io_wl_stats (
   $hostname                  = $::hostname,
   $fqdn                      = $::fqdn,
   $monitor_location          = undef,
-  $service_name              = lookup('io_wl_stats::service_name', undef, undef, 'peoplesoft'),
-  $check_interval            = lookup('io_wl_stats::check_interval', undef, undef, '300s'),
-  $port                      = lookup('io_wl_stats::port', undef, undef, '8000'),
-  $host                      = lookup('io_wl_stats::host', undef, undef, ''),
-  $user                      = lookup('io_wl_stats::user', undef, undef, ''),
-  $pwd                       = lookup('io_wl_stats::pwd', undef, undef, ''),
-  $health                    = lookup('io_wl_stats::health', undef, undef, true),
-  $health_fields             = lookup('io_wl_stats::health_fields', undef, undef, 'name,state,activationTime'),
-  $jvm                       = lookup('io_wl_stats::jvm', undef, undef, true),
-  $pia                       = lookup('io_wl_stats::pia', undef, undef, true)
+  $service_name              = lookup('io_metricbeat::service_name', undef, undef, 'peoplesoft'),
+  $check_interval            = lookup('io_metricbeat::check_interval', undef, undef, '300s'),
+  $port                      = lookup('io_metricbeat::port', undef, undef, '8000'),
+  $host                      = lookup('io_metricbeat::host', undef, undef, ''),
+  $user                      = lookup('io_metricbeat::user', undef, undef, ''),
+  $pwd                       = lookup('io_metricbeat::pwd', undef, undef, ''),
+  $health                    = lookup('io_metricbeat::health', undef, undef, true),
+  $health_fields             = lookup('io_metricbeat::health_fields', undef, undef, 'name,state,activationTime'),
+  $jvm                       = lookup('io_metricbeat::jvm', undef, undef, true),
+  $pia                       = lookup('io_metricbeat::pia', undef, undef, true)
 ) {
   if ($health) {
-    contain ::io_wl_stats::health
+    contain ::io_metricbeat::health
   }
   # if ($jvm) {
-  #   contain ::io_wl_stats::jvm
+  #   contain ::io_metricbeat::jvm
   # }
   # if ($pia) {
-  #   contain ::io_wl_stats::pia
+  #   contain ::io_metricbeat::pia
   # }
 }
