@@ -5,6 +5,7 @@ class io_metricbeat::health (
   $monitor_location          = $io_metricbeat::monitor_location,
   $service_name              = $io_metricbeat::service_name,
   $check_interval            = $io_metricbeat::check_interval,
+  $fqdn                      = $io_metricbeat::fqdn,
   $host                      = $io_metricbeat::host,
   $port                      = $io_metricbeat::port,
   $user                      = $io_metricbeat::user,
