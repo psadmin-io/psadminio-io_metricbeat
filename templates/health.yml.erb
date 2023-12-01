@@ -1,0 +1,13 @@
+- module: http
+  metricsets:
+    - json
+  period: '<%= @check_interval %>'
+  hosts: ["http://<%= @host %>:<%= @port %>/management/weblogic/latest/serverRuntime?fields=<%= @health_fields %>&links=none"]
+  namespace: "weblogic"
+  method: "GET"
+  username: "<%= @user %>"
+  password: "<%= @pwd %>"
+  service:
+    name: <%= @service %>
+  fields:
+    hostname: <%= @host %>
