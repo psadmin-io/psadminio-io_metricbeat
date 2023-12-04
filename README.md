@@ -1,121 +1,83 @@
 # io_metricbeat
 
-Welcome to your new module. A short overview of the generated parts can be found
-in the [PDK documentation][1].
-
-The README template below provides a starting point with details about what
-information to include in your README.
+The `io_metricbeat` Puppet module will create Heartbeat monitors for web servers, app servers, and hosts. It can be run with the DPK to automatically create monitors for Heartbeat to consume. 
 
 ## Table of Contents
 
 - [io\_metricbeat](#io_metricbeat)
   - [Table of Contents](#table-of-contents)
-  - [Description](#description)
   - [Setup](#setup)
-    - [What io\_metricbeat affects **OPTIONAL**](#what-io_metricbeat-affects-optional)
-    - [Setup Requirements **OPTIONAL**](#setup-requirements-optional)
-    - [Beginning with io\_metricbeat](#beginning-with-io_metricbeat)
-  - [Usage](#usage)
+    - [What io\_metricbeat affects](#what-io_metricbeat-affects)
   - [Reference](#reference)
-  - [Limitations](#limitations)
-  - [Development](#development)
-  - [Release Notes/Contributors/Etc. **Optional**](#release-notescontributorsetc-optional)
-
-## Description
-
-Briefly tell users why they might want to use your module. Explain what your
-module does and what kind of problems users can solve with it.
-
-This should be a fairly short description helps the user decide if your module
-is what they want.
 
 ## Setup
 
-### What io_metricbeat affects **OPTIONAL**
+1. Clone the repository or add it as a submodule to the DPK.
 
-If it's obvious what your module touches, you can skip this section. For
-example, folks can probably figure out that your mysql_instance module affects
-their MySQL instances.
+    ```bash
+    $ cd <DPK_LOCATION>
+    $ git submodule add https://github.com/psadmin-io/io_metricbeat.git modules/io_metricbeat
+    ```
+2. Add the required `io_metricbeat::vars` (See the [Reference](#reference) section.)
+3. Run the module to test
 
-If there's more that they should know about, though, this is the place to
-mention:
+    ```bash
+    $ puppet apply --confdir <DPK_LOCATION> -e "contain ::io_metricbeat"
+    ```
 
-* Files, packages, services, or operations that the module will alter, impact,
-  or execute.
-* Dependencies that your module automatically installs.
-* Warnings or other important notices.
+4. (Optional) Include `io_metricbeat` as pat of your DPK build by added it to your DPK role.
 
-### Setup Requirements **OPTIONAL**
+    ```puppet
+    # pt_tools_midtier.pp
+    if $ensure == present {
+      contain ::pt_profile::pt_tools_preboot_config
+      contain ::pt_profile::pt_domain_boot
+      contain ::pt_profile::pt_tools_postboot_config
+      contain ::pt_profile::pt_password
+      contain ::io_metricbeat
+      
+      Class['::pt_profile::pt_system'] ->
+      Class['::pt_profile::pt_tools_deployment'] ->
+      Class['::pt_profile::pt_psft_environment'] ->
+      Class['::pt_profile::pt_appserver'] ->
+      Class['::pt_profile::pt_prcs'] ->
+      Class['::pt_profile::pt_pia'] ->
+      Class['::pt_profile::pt_tools_preboot_config'] ->
+      Class['::pt_profile::pt_domain_boot'] ->
+      Class['::pt_profile::pt_tools_postboot_config'] ->
+      Class['::io_metricbeat']
+    }
+    ```
 
-If your module requires anything extra before setting up (pluginsync enabled,
-another module, etc.), mention it here.
+### What io_metricbeat affects 
 
-If your most recent release breaks compatibility or requires particular steps
-for upgrading, you might want to include an additional "Upgrading" section here.
-
-### Beginning with io_metricbeat
-
-The very basic steps needed for a user to get the module up and running. This
-can include setup steps, if necessary, or it can be an example of the most basic
-use of the module.
-
-## Usage
-
-Include usage examples for common use cases in the **Usage** section. Show your
-users how to use your module to solve problems, and be sure to include code
-examples. Include three to five examples of the most important or common tasks a
-user can accomplish with your module. Show users how to accomplish more complex
-tasks that involve different types, classes, and functions working in tandem.
+The module will not modify PeopleSoft domains. It only creates external files to be used with Metricbeat for monitoring PeopleSoft WebLogic domains. 
 
 ## Reference
 
-This section is deprecated. Instead, add reference information to your code as
-Puppet Strings comments, and then use Strings to generate a REFERENCE.md in your
-module. For details on how to add code comments and generate documentation with
-Strings, see the [Puppet Strings documentation][2] and [style guide][3].
+Configuration options:
 
-If you aren't ready to use Strings yet, manually create a REFERENCE.md in the
-root of your module directory and list out each of your module's classes,
-defined types, facts, functions, Puppet tasks, task plans, and resource types
-and providers, along with the parameters for each.
+* Service Name: used by Elasticsearch/Opensearch Observability to group different monitors into a application.
+* Monitor Location: Where `io_metricbeat` will write the monitor files.
+* Check Interval: How often to run the monitor (default is `300s`)
+* Web Port: Specify HTTP port for the web monitor (default is `8000`)
+* Fully Qualified Domain Name: The FQDN to use for connecting to the Weblogic Domain (default is `::fqdn` fact)
+* Hostname: Use for added fields in the Metricbeat data (default is `::hostname` fact)
+* User: The Weblogic user to connect to the `/management` API
+* Password: The Weblogic user password to connect to the `/management` API
+* Health (boolean): Enable creation of the Health monitor (default is `true`)
+* Health Fields: the fields to select from the `/serverRuntime` API (default is `name,state,activationTime`)
+* JVM (boolean): Enable the creation of the JVM monitor (default is `true`)
+* JVM Fields: the fields to select from the `serverRuntime/JVMRuntime` API (default is `heapSizeCurrent,heapFreeCurrent,heapFreePercent,heapSizeMax,name,type`)
+* PIA (boolean): Enable the creation of the PIA monitor (default is `true`)
+* PIA Fields: the fields to select from the `serverRuntime/applicationRuntimes/peoplesoft/componentRuntimes/PIA_` API (default is `openSessionsCurrentCount,openSessionsHighCount`)
 
-For each element (class, defined type, function, and so on), list:
+Add this configuration to your `psft_customizations.yaml` file to enable `io_metricbeat`.
 
-* The data type, if applicable.
-* A description of what the element does.
-* Valid values, if the data type doesn't make it obvious.
-* Default value, if any.
-
-For example:
-
+```yaml
+---
+io_metricbeat::service_name:      "%{hiera('db_name')}"
+io_metricbeat::monitor_location:  '/psoft/share/metricbeat/'
+io_metricbeat::pwd:               "${WL_ADMIN_PWD}" # This can reference a keystore value
+io_metricbeat::port:              "%{hiera('pia_http_port')}"
 ```
-### `pet::cat`
-
-#### Parameters
-
-##### `meow`
-
-Enables vocalization in your cat. Valid options: 'string'.
-
-Default: 'medium-loud'.
-```
-
-## Limitations
-
-In the Limitations section, list any incompatibilities, known issues, or other
-warnings.
-
-## Development
-
-In the Development section, tell other users the ground rules for contributing
-to your project and how they should submit their work.
-
-## Release Notes/Contributors/Etc. **Optional**
-
-If you aren't using changelog, put your release notes here (though you should
-consider using changelog). You can also add any additional sections you feel are
-necessary or important to include here. Please use the `##` header.
-
-[1]: https://puppet.com/docs/pdk/latest/pdk_generating_modules.html
-[2]: https://puppet.com/docs/puppet/latest/puppet_strings.html
-[3]: https://puppet.com/docs/puppet/latest/puppet_strings_style.html
