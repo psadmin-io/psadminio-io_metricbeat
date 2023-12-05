@@ -9,6 +9,7 @@ The `io_metricbeat` Puppet module will create Metricbeat module files to monitor
   - [Setup](#setup)
     - [What io\_metricbeat affects](#what-io_metricbeat-affects)
   - [Reference](#reference)
+    - [HTTPS Verification](#https-verification)
 
 ## Setup
 
@@ -25,7 +26,7 @@ The `io_metricbeat` Puppet module will create Metricbeat module files to monitor
     $ puppet apply --confdir <DPK_LOCATION> -e "contain ::io_metricbeat"
     ```
 
-4. (Optional) Include `io_metricbeat` as pat of your DPK build by added it to your DPK role.
+4. (Optional) Include `io_metricbeat` as part of your DPK build by adding it to your DPK role.
 
     ```puppet
     # pt_tools_midtier.pp
@@ -81,8 +82,10 @@ This is the minimal configuration to add to `psft_customizations.yaml` to enable
 ---
 io_metricbeat::service_name:      "%{hiera('db_name')}"
 io_metricbeat::monitor_location:  '/psoft/share/metricbeat/'
-io_metricbeat::pwd:               "${WL_ADMIN_PWD}" # This can reference a keystore value
-io_metricbeat::port:              "%{hiera('pia_http_port')}"
+io_metricbeat::pwd:               "%{hiera('webserver_admin_user_pwd')}" 
+# This can reference a metricbeat keystore value like this: "${WL_ADMIN_PWD}"
+io_metricbeat::port:              "%{hiera('pia_https_port')}"
+io_metricbeat::ssl_verify:        false
 ```
 
 Here are 3 sample files that are created for Metricbeat:
@@ -94,7 +97,8 @@ Here are 3 sample files that are created for Metricbeat:
   metricsets:
     - json
   period: '300s'
-  hosts: ["http://<fqdn>:<port>/management/weblogic/latest/serverRuntime?fields=name,state,activationTime&links=none"]
+  hosts: ["https://<fqdn>:<port>/management/weblogic/latest/serverRuntime?fields=name,state,activationTime&links=none"]
+  ssl.verification_mode: 'none'
   namespace: "weblogic"
   method: "GET"
   username: "<user>"
@@ -114,6 +118,7 @@ Here are 3 sample files that are created for Metricbeat:
     - json
   period: '300s'
   hosts: ["http://<fqdn>:<port>/management/weblogic/latest/serverRuntime/JVMRuntime?fields=heapSizeCurrent,heapFreeCurrent,heapFreePercent,heapSizeMax,name,type&links=none"]
+  ssl.verification_mode: 'none'
   namespace: "jvm"
   method: "GET"
   username: "<user>"
@@ -133,6 +138,7 @@ Here are 3 sample files that are created for Metricbeat:
     - json
   period: '300s'
   hosts: ["http://<fqdn>:<port>/management/weblogic/latest/serverRuntime/applicationRuntimes/peoplesoft/componentRuntimes/PIA_?fields=openSessionsCurrentCount,openSessionsHighCount&links=none"]
+  ssl.verification_mode: 'none'
   namespace: "pia"
   method: "GET"
   username: "<user>"
@@ -143,3 +149,26 @@ Here are 3 sample files that are created for Metricbeat:
     hostname: hostname
     id: weblogic-hrdev-hostname
 ```
+
+### HTTPS Verification
+
+If you have a self-signed or specific CA file you want to use for verifying HTTPS connections, you can specify that file in configuration. The default is `/usr/share/metricbeat/trust.crt` to be used with the `docker.elastic.co/beats/metricbeat-oss:7.12.1` container image.
+
+```yaml
+io_metricbeat::ca_file:              '/psoft/share/ca/self-signed-trust.crt'
+```
+
+This value will be added to the monitor files like this:
+
+```yaml
+  hosts: ["http://<fqdn>:<port>/management/weblogic/latest/serverRuntime/applicationRuntimes/peoplesoft/componentRuntimes/PIA_?fields=openSessionsCurrentCount,openSessionsHighCount&links=none"]
+  ssl.certificate_authorities: ['/psoft/share/ca/self-signed-trust.crt']
+```
+
+You can also disable HTTP Verification by using the flag `ssl_verify`.
+
+```yaml
+io_metricbeat::ssl_verify:        false
+```
+
+This will set `ssl.verification_mode: 'none'` in your monitor files.
