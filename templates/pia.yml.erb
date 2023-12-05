@@ -2,7 +2,13 @@
   metricsets:
     - json
   period: '<%= @check_interval %>'
-  hosts: ["http://<%= @fqdn %>:<%= @port %>/management/weblogic/latest/serverRuntime/applicationRuntimes/peoplesoft/componentRuntimes/PIA_?fields=<%= @pia_fields %>&links=none"]
+  hosts: ["https://<%= @fqdn %>:<%= @port %>/management/weblogic/latest/serverRuntime/applicationRuntimes/peoplesoft/componentRuntimes/PIA_?fields=<%= @pia_fields %>&links=none"]
+  <% if !ssl_verify? %>
+  ssl.verification_mode: 'none'
+  <% end %>
+  <% if trust_ca? %>
+  ssl.certificate_authorities: ['<%= ca_file %>']
+  <% end %>
   namespace: "pia"
   method: "GET"
   username: "<%= @user %>"

@@ -60,11 +60,14 @@ Configuration options:
 * Service Name: used by Elasticsearch/Opensearch Observability to group different monitors into a application.
 * Monitor Location: Where `io_metricbeat` will write the monitor files.
 * Check Interval: How often to run the monitor (default is `300s`)
-* Web Port: Specify HTTP port for the web monitor (default is `8000`)
+* Web Port: Specify HTTPS port for the web monitor (default is `8443`). `https://`` is defaulted in the template files.
 * Fully Qualified Domain Name: The FQDN to use for connecting to the Weblogic Domain (default is `::fqdn` fact)
 * Hostname: Use for added fields in the Metricbeat data (default is `::hostname` fact)
 * User: The Weblogic user to connect to the `/management` API
 * Password: The Weblogic user password to connect to the `/management` API
+* SSL Verify (boolean): SSL Certificate Validation (default is `true`). Change to `false` if you want to skip SSL Certificate Validation.
+* Trust CA (boolean): The monitor files will include a Certificate Authority file to verify HTTPS connections (default `true`
+* CA File: The Certificate Authority file to use for HTTPS validations (default is `/usr/share/metricbeat/trust.crt`)
 * Health (boolean): Enable creation of the Health monitor (default is `true`)
 * Health Fields: the fields to select from the `/serverRuntime` API (default is `name,state,activationTime`)
 * JVM (boolean): Enable the creation of the JVM monitor (default is `true`)

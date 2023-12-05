@@ -10,6 +10,9 @@ class io_metricbeat::pia (
   $port                      = $io_metricbeat::port,
   $user                      = $io_metricbeat::user,
   $pwd                       = $io_metricbeat::pwd,
+  $ssl_verify                = $io_metricbeat::ssl_verify,
+  $trust_ca                  = $io_metricbeat::trust_ca,
+  $ca_file                   = $io_metricbeat::ca_file,
   $pia_fields                = $io_metricbeat::pia_fields
 ) inherits io_metricbeat {
   notify { "Create Metricbeat monitors for PIA of ${service_name}-${host}": }

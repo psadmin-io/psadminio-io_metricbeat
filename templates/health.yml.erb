@@ -2,13 +2,19 @@
   metricsets:
     - json
   period: '<%= @check_interval %>'
-  hosts: ["http://<%= @fqdn %>:<%= @port %>/management/weblogic/latest/serverRuntime?fields=<%= @health_fields %>&links=none"]
-  namespace: "weblogic"
-  method: "GET"
-  username: "<%= @user %>"
-  password: "<%= @pwd %>"
+  hosts: ["https://<%= @fqdn %>:<%= @port %>/management/weblogic/latest/serverRuntime?fields=<%= @health_fields %>&links=none"]
+  <% if !ssl_verify? %>
+  ssl.verification_mode: 'none'
+  <% end %>
+  <% if trust_ca? %>
+  ssl.certificate_authorities: ['<%= ca_file %>']
+  <% end %>
+  namespace: 'weblogic'
+  method: 'GET'
+  username: '<%= @user %>'
+  password: '<%= @pwd %>'
   service:
-    name: <%= @service_name %>
+    name: '<%= @service_name %>'
   fields:
-    hostname: <%= @host %>
-    id: weblogic-<%= @service_name %>-<%= @host %>
+    hostname: '<%= @host %>'
+    id: 'weblogic-<%= @service_name %>-<%= @host %>'
