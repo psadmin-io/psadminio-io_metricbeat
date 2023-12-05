@@ -3,11 +3,11 @@
     - json
   period: '<%= @check_interval %>'
   hosts: ["https://<%= @fqdn %>:<%= @port %>/management/weblogic/latest/serverRuntime/JVMRuntime?fields=<%= @jvm_fields %>&links=none"]
-  <% if !ssl_verify? %>
+  <% if !@ssl_verify? %>
   ssl.verification_mode: 'none'
   <% end %>
-  <% if trust_ca? %>
-  ssl.certificate_authorities: ['<%= ca_file %>']
+  <% if @trust_ca? %>
+  ssl.certificate_authorities: ['<%= @ca_file %>']
   <% end %>
   namespace: "jvm"
   method: "GET"
