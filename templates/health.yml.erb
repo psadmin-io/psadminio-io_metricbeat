@@ -3,10 +3,10 @@
     - json
   period: '<%= @check_interval %>'
   hosts: ["https://<%= @fqdn %>:<%= @port %>/management/weblogic/latest/serverRuntime?fields=<%= @health_fields %>&links=none"]
-  <% if @ssl_verify == false %>
+  <% if @ssl_verify == false -%>
   ssl.verification_mode: 'none'
   <% end %>
-  <% if @trust_ca == true %>
+  <% if @trust_ca == true -%>
   ssl.certificate_authorities: ['<%= @ca_file %>']
   <% end %>
   namespace: 'weblogic'
