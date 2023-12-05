@@ -3,10 +3,10 @@
     - json
   period: '<%= @check_interval %>'
   hosts: ["https://<%= @fqdn %>:<%= @port %>/management/weblogic/latest/serverRuntime/applicationRuntimes/peoplesoft/componentRuntimes/PIA_?fields=<%= @pia_fields %>&links=none"]
-  <% if !@ssl_verify? %>
+  <% if @ssl_verify == false %>
   ssl.verification_mode: 'none'
   <% end %>
-  <% if @trust_ca? %>
+  <% if @trust_ca == true %>
   ssl.certificate_authorities: ['<%= @ca_file %>']
   <% end %>
   namespace: "pia"
